@@ -1,22 +1,22 @@
 #pragma once
 
 #include "BaseContext.h"
-#include "RefVal.h"
+#include "Ref.h"
 #include "detail/refs.h"
 
 namespace seljs2 {
 
-class Context : public BaseContext, public RefVal
+class Context : public BaseContext
 {
 public:
 	Context() :
-		BaseContext(), RefVal(this, false), _ctx(duk_create_heap_default()), _owns_context(true)
+		BaseContext(), _ctx(duk_create_heap_default()), _owns_context(true)
 	{
 		detail::duv_ref_setup(_ctx);
 	}
 
 	Context(duk_context *ctx) :
-		BaseContext(), RefVal(this, false), _ctx(ctx), _owns_context(false)
+		BaseContext(), _ctx(ctx), _owns_context(false)
 	{
 		detail::duv_ref_setup(ctx);
 	}
@@ -28,14 +28,24 @@ public:
 		_ctx = nullptr;
 	}
 
-	void push() const override
-	{
-		duk_push_global_object(*this);
-	}
-
 	operator duk_context*() const override 
 	{
 		return _ctx;
+	}
+
+	Ref global()
+	{
+		ResetStackOnScopeExit r(_ctx);
+		duk_push_global_object(_ctx);
+		return Ref(this);
+	}
+
+	Ref operator[](const std::string &name) &
+	{
+		ResetStackOnScopeExit r(_ctx);
+		duk_push_global_object(_ctx);
+		duk_get_prop_string(_ctx, -1, name.c_str());
+		return Ref(this);
 	}
 private:
 	duk_context *_ctx;
