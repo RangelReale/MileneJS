@@ -12,13 +12,20 @@
 
 namespace seljs2 {
 
+class RefPush
+{
+public:
+	virtual ~RefPush() {}
+	virtual void push(BaseContext *ctx) = 0;
+};
+
 class Ref 
 {
 public:
-	Ref(BaseContext *ctx, bool isref = true) :
-		_ctx(ctx), _ref()
+	Ref(BaseContext *ctx, std::shared_ptr<RefPush> refpush = std::shared_ptr<RefPush>()) :
+		_ctx(ctx), _refpush(refpush), _ref()
 	{
-		if (isref)
+		if (!_refpush)
 			_ref.reset(new detail::refsholder(ctx));
 	}
 
@@ -28,6 +35,7 @@ public:
 
 	Ref(const Ref& other) :
 		_ctx(other._ctx),
+		_refpush(other._refpush),
 		_ref(other._ref)
 	{
 	}
@@ -35,11 +43,12 @@ public:
 	Ref& operator=(const Ref& other)
 	{
 		_ctx = other._ctx;
+		_refpush = other._refpush;
 		_ref = other._ref;
 	}
 
 	Ref(Ref&& other) :
-		_ctx(other._ctx), _ref()
+		_ctx(other._ctx), _refpush(other._refpush), _ref()
 	{
 		_ref.swap(other._ref);
 	}
@@ -47,16 +56,24 @@ public:
 	Ref& operator=(Ref&& other)
 	{
 		_ctx = other._ctx;
+		_refpush = other._refpush;
 		_ref.swap(other._ref);
 		return *this;
 	}
 
 	void push() const
 	{
-		if (_ref)
-			detail::duv_push_ref(ctx()->ctx(), _ref->ref());
+		if (_refpush) 
+		{
+			_refpush->push(_ctx);
+		}
 		else
-			duk_push_undefined(ctx()->ctx());
+		{
+			if (_ref)
+				detail::duv_push_ref(ctx()->ctx(), _ref->ref());
+			else
+				duk_push_undefined(ctx()->ctx());
+		}
 	}
 
 	template<typename T>
@@ -72,6 +89,7 @@ public:
 		ResetStackOnScopeExit r(ctx()->ctx());
 		push();
 		duk_get_prop_string(ctx()->ctx(), -1, name.c_str());
+		_refpush.reset();
 		_ref.reset(new detail::refsholder(_ctx));
 		return std::move(*this);
 	}
@@ -87,6 +105,7 @@ public:
 	BaseContext *ctx() const { return _ctx; }
 private:
 	BaseContext *_ctx;
+	std::shared_ptr<RefPush> _refpush;
 	std::shared_ptr<detail::refsholder> _ref;
 };
 }

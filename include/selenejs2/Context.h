@@ -6,6 +6,15 @@
 
 namespace seljs2 {
 
+class RefPushGlobal : public RefPush
+{
+public:
+	void push(BaseContext *ctx) override
+	{ 
+		duk_push_global_object(ctx->ctx());
+	}
+};
+
 class Context : public BaseContext
 {
 public:
@@ -35,17 +44,20 @@ public:
 
 	Ref global()
 	{
-		ResetStackOnScopeExit r(_ctx);
-		duk_push_global_object(_ctx);
-		return Ref(this);
+		return Ref(this, std::shared_ptr<RefPush>(new RefPushGlobal));
 	}
 
 	Ref operator[](const std::string &name) &
 	{
+		Ref ret = global();
+		return ret[name];
+
+		/*
 		ResetStackOnScopeExit r(_ctx);
 		duk_push_global_object(_ctx);
 		duk_get_prop_string(_ctx, -1, name.c_str());
 		return Ref(this);
+		*/
 	}
 private:
 	duk_context *_ctx;

@@ -15,10 +15,12 @@ public:
 		_ctx(ctx)
 	{
 		_ref = duv_ref(*_ctx);
+		std::cout << "@ REF " << _ref << std::endl;
 	}
 
 	~refsholder()
 	{
+		std::cout << "# UREF " << _ref << std::endl;
 		duv_unref(*_ctx, _ref);
 	}
 
