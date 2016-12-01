@@ -6,6 +6,7 @@
 #define DUV_REFNIL      (-1)
 
 namespace seljs2 {
+namespace detail {
 
 // Create a global array refs in the heap stash.
 inline void duv_ref_setup(duk_context *ctx) {
@@ -104,4 +105,4 @@ inline void duv_unref(duk_context *ctx, int ref) {
   duk_pop(ctx);
 }
 
-}
+} }

@@ -7,7 +7,6 @@
 #include <type_traits>
 
 namespace seljs2 {
-
 namespace detail {
 
 template<typename T>
@@ -52,5 +51,4 @@ void _push(duk_context *ctx, T&& t) {
 	value<T>::push(ctx, std::forward<T>(t));
 }
 
-}
-}
+} }

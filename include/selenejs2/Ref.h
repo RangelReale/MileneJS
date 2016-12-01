@@ -1,40 +1,42 @@
 #pragma once
 
-#include "BaseState.h"
-#include "refs.h"
-#include "value.h"
+#include "BaseContext.h"
 #include "ResourceHandler.h"
+#include "ExceptionTypes.h"
+#include "detail/refs.h"
+#include "detail/value.h"
 
 namespace seljs2 {
-class Ref {
-private:
-	BaseState *_state;
-	bool _isref;
-	int _ref;
+
+class Ref 
+{
 public:
-	Ref(BaseState *state, bool isref = true) : _state(state), _isref(isref) {
-		if (_isref)
-			_ref = duv_ref(*_state);
-	}
-	~Ref() {
-		if (_isref)
-			duv_unref(*_state, _ref);
+	Ref(BaseContext *ctx) :
+		_ctx(ctx)
+	{
+
 	}
 
-	bool isRef() const {
-		return _isref;
-	}
+	virtual ~Ref() {}
 
-	void push() const {
-		if (_isref)
-			duv_push_ref(*_state, _ref);
+	virtual void push() const
+	{
+		duk_push_undefined(*_ctx);
 	}
 
 	template<typename T>
 	T get() const {
-		ResetStackOnScopeExit r(*_state);
+		ResetStackOnScopeExit r(*_ctx);
 		push();
-		return detail::_get<T>(*_state, -1);
+		return detail::_get<T>(*_ctx, -1);
 	}
+
+	virtual Ref operator[](const std::string& name) const {
+		throw NotImplementedError();
+	}
+
+	BaseContext *ctx() const { return _ctx; }
+private:
+	BaseContext *_ctx;
 };
 }

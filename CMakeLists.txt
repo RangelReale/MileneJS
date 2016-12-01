@@ -16,7 +16,7 @@ endif(APPLE)
 
 include_directories(include)
 INCLUDE_DIRECTORIES(duktape)
-file(GLOB headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+file(GLOB_RECURSE headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
   include/*.h include/selenejs2/*.h)
 
 add_executable(test_runner ${CMAKE_CURRENT_SOURCE_DIR}/test/Test.cpp ${headers}
