@@ -5,8 +5,10 @@
 #include "ExceptionTypes.h"
 #include "detail/refs.h"
 #include "detail/value.h"
+#include "detail/refsholder.h"
 
 #include <iostream>
+#include <memory>
 
 namespace seljs2 {
 
@@ -14,65 +16,45 @@ class Ref
 {
 public:
 	Ref(BaseContext *ctx, bool isref = true) :
-		_ctx(ctx), _isref(isref)
+		_ctx(ctx), _ref()
 	{
-		if (_isref)
-			_ref = detail::duv_ref(ctx->ctx());
+		if (isref)
+			_ref.reset(new detail::refsholder(ctx));
 	}
 
 	virtual ~Ref() 
 	{
-		if (_isref)
-			detail::duv_unref(ctx()->ctx(), _ref);
 	}
 
 	Ref(const Ref& other) :
 		_ctx(other._ctx),
-		_isref(other._isref)
+		_ref(other._ref)
 	{
-		if (_isref)
-		{
-			detail::duv_push_ref(_ctx->ctx(), other._ref);
-			_ref = detail::duv_ref(_ctx->ctx());
-		}
 	}
 
 	Ref& operator=(const Ref& other)
 	{
 		_ctx = other._ctx;
-		_isref = other._isref;
-		if (_isref)
-		{
-			detail::duv_push_ref(_ctx->ctx(), other._ref);
-			_ref = detail::duv_ref(_ctx->ctx());
-		}
+		_ref = other._ref;
 	}
 
 	Ref(Ref&& other) :
-		_ctx(other._ctx),
-		_isref(other._isref)
+		_ctx(other._ctx), _ref()
 	{
-		if (_isref)
-			_ref = other._ref;
-		other._isref = false;
-		other._ref = 0;
+		_ref.swap(other._ref);
 	}
 
 	Ref& operator=(Ref&& other)
 	{
 		_ctx = other._ctx;
-		_isref = other._isref;
-		if (_isref)
-			_ref = other._ref;
-		other._isref = false;
-		other._ref = 0;
+		_ref.swap(other._ref);
 		return *this;
 	}
 
 	void push() const
 	{
-		if (_isref)
-			detail::duv_push_ref(ctx()->ctx(), _ref);
+		if (_ref)
+			detail::duv_push_ref(ctx()->ctx(), _ref->ref());
 		else
 			duk_push_undefined(ctx()->ctx());
 	}
@@ -90,10 +72,7 @@ public:
 		ResetStackOnScopeExit r(ctx()->ctx());
 		push();
 		duk_get_prop_string(ctx()->ctx(), -1, name.c_str());
-		if (_isref)
-			detail::duv_unref(ctx()->ctx(), _ref);
-		_isref = true;
-		_ref = detail::duv_ref(ctx()->ctx());
+		_ref.reset(new detail::refsholder(_ctx));
 		return std::move(*this);
 	}
 
@@ -108,7 +87,6 @@ public:
 	BaseContext *ctx() const { return _ctx; }
 private:
 	BaseContext *_ctx;
-	int _ref;
-	bool _isref;
+	std::shared_ptr<detail::refsholder> _ref;
 };
 }
