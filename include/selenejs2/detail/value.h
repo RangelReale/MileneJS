@@ -39,6 +39,13 @@ T _get(duk_context *ctx, duk_idx_t index) {
 	return value<T>::get(ctx, index);
 }
 
+template<typename T>
+T _cast(duk_context *ctx, duk_idx_t index) {
+	ResetStackOnScopeExit r(ctx);
+	duk_dup(ctx, index);
+	return value<T>::to(ctx, -1);
+}
+
 template <typename T>
 T _pop(duk_context *ctx) {
 	T ret = ::seljs2::detail::_get<T>(ctx, -1);

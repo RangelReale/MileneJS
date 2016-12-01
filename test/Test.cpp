@@ -38,13 +38,21 @@ int main() {
 		ctx["h"].setRef("b", 999);
 		std::cout << ctx["h"]["b"].get<int>() << std::endl;
 
-		ctx.setRef("newobj", Type::OBJECT).set("i", 12);
+		Ref obj = ctx.setRef("newobj", Type::OBJECT);
+		obj.set("i", 12);
+		obj.set("vv", 7762);
 		std::cout << ctx["newobj"]["i"].get<int>() << std::endl;
+		for (auto key : obj.keyList()) {
+			std::cout << key << " == " << obj[key].cast<std::string>() << std::endl;
+		}
 
 		Ref arr = ctx.setRef("newarr", Type::ARRAY);
 		arr.setRef(0, 1024); 
 		arr.setRef(1, 2048);
 		std::cout << ctx["newarr"][1].get<int>() << std::endl;
+		for (auto key : arr.keyList()) {
+			std::cout << key << " == " << arr[key].cast<std::string>() << std::endl;
+		}
 	}
 
 	std::cout << "PRESS ANY KEY TO CONTINUE";

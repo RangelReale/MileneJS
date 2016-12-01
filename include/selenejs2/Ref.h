@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <memory>
+#include <vector>
 
 namespace seljs2 {
 
@@ -96,9 +97,9 @@ public:
 		else
 		{
 			if (_ref)
-				detail::duv_push_ref(ctx()->ctx(), _ref->ref());
+				detail::duv_push_ref(*_ctx, _ref->ref());
 			else
-				duk_push_undefined(ctx()->ctx());
+				duk_push_undefined(*_ctx);
 		}
 	}
 
@@ -108,6 +109,14 @@ public:
 		ResetStackOnScopeExit r(*_ctx);
 		push();
 		return detail::_get<T>(*_ctx, -1);
+	}
+
+	template<typename T>
+	T cast() const
+	{
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		return detail::_cast<T>(*_ctx, -1);
 	}
 
 	template<typename T>
@@ -150,9 +159,9 @@ public:
 
 	Ref&& operator[](const std::string& name) && 
 	{
-		ResetStackOnScopeExit r(ctx()->ctx());
+		ResetStackOnScopeExit r(*_ctx);
 		push();
-		duk_get_prop_string(ctx()->ctx(), -1, name.c_str());
+		duk_get_prop_string(*_ctx, -1, name.c_str());
 		_refpush.reset();
 		_ref.reset(new detail::refsholder(_ctx));
 		return std::move(*this);
@@ -160,9 +169,9 @@ public:
 
 	Ref&& operator[](const int index) &&
 	{
-		ResetStackOnScopeExit r(ctx()->ctx());
+		ResetStackOnScopeExit r(*_ctx);
 		push();
-		duk_get_prop_index(ctx()->ctx(), -1, index);
+		duk_get_prop_index(*_ctx, -1, index);
 		_refpush.reset();
 		_ref.reset(new detail::refsholder(_ctx));
 		return std::move(*this);
@@ -170,18 +179,43 @@ public:
 
 	Ref operator[](const std::string &name) &
 	{
-		ResetStackOnScopeExit r(ctx()->ctx());
+		ResetStackOnScopeExit r(*_ctx);
 		push();
-		duk_get_prop_string(ctx()->ctx(), -1, name.c_str());
+		duk_get_prop_string(*_ctx, -1, name.c_str());
 		return Ref(_ctx);
 	}
 
 	Ref operator[](const int index) &
 	{
-		ResetStackOnScopeExit r(ctx()->ctx());
+		ResetStackOnScopeExit r(*_ctx);
 		push();
-		duk_get_prop_index(ctx()->ctx(), -1, index);
+		duk_get_prop_index(*_ctx, -1, index);
 		return Ref(_ctx);
+	}
+
+	bool hasKey(const std::string& name) const {
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		return duk_is_object(*_ctx, -1) && duk_has_prop_string(*_ctx, -1, name.c_str());
+	}
+
+	int length() const {
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		return duk_get_length(*_ctx, -1);
+	}
+
+	std::vector<std::string> keyList(duk_uint_t enum_flags = 0) const {
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		std::vector<std::string> ret;
+		duk_enum(*_ctx, -1, enum_flags);
+		while (duk_next(*_ctx, -1, 0)) {
+			ret.push_back(std::string(duk_get_string(*_ctx, -1)));
+			duk_pop(*_ctx);
+		}
+		duk_pop(*_ctx); // enum
+		return ret;
 	}
 
 	BaseContext *ctx() const { return _ctx; }
