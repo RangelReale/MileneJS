@@ -51,14 +51,20 @@ public:
 	{
 		Ref ret = global();
 		return ret[name];
-
-		/*
-		ResetStackOnScopeExit r(_ctx);
-		duk_push_global_object(_ctx);
-		duk_get_prop_string(_ctx, -1, name.c_str());
-		return Ref(this);
-		*/
 	}
+
+	template<typename T>
+	void set(const std::string &name, T&& value)
+	{
+		global().set(name, std::forward<T>(value));
+	}
+
+	template<typename T>
+	Ref setRef(const std::string &name, T&& value)
+	{
+		return global().setRef(name, std::forward<T>(value));
+	}
+
 private:
 	duk_context *_ctx;
 	bool _owns_context;

@@ -58,6 +58,13 @@ public:
 	}
 };
 
+class NotSupportedError : public BaseSeleneJSException {
+public:
+	char const * what() const noexcept override {
+		return "Not supported.";
+	}
+};
+
 // gets message and possible traceback from Error object
 inline std::string ErrorMessage(duk_context *L, duk_idx_t index) {
 	std::string ret;
