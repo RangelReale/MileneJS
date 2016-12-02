@@ -28,19 +28,34 @@ namespace Properties {
 	}
 
 	// put an associated void* to object at index, leaves object on the stack
-	static inline void obj_put_ptr(duk_context *ctx, duk_idx_t index, void *ptr)
+	static inline void obj_put_ptr(duk_context *ctx, duk_idx_t index, void *ptr, bool owns = false)
 	{
 		duk_idx_t oidx = duk_normalize_index(ctx, index);
 		duk_push_pointer(ctx, ptr);
 		duk_put_prop_string(ctx, oidx, "\xFF" "_obj");
+		if (owns)
+		{
+			duk_push_true(ctx);
+			duk_put_prop_string(ctx, oidx, "\xFF" "_obj_owns");
+		}
 	}
 
 	// return ptr of object at index
-	static inline void* obj_get_ptr(duk_context *ctx, duk_idx_t index)
+	static inline void* obj_get_ptr(duk_context *ctx, duk_idx_t index, bool onlyowned = false)
 	{
-		duk_get_prop_string(ctx, index, "\xFF" "_obj");
+		duk_idx_t oidx = duk_normalize_index(ctx, index);
+		duk_get_prop_string(ctx, oidx, "\xFF" "_obj");
 		void* ptr = duk_get_pointer(ctx, -1);
 		duk_pop(ctx);
+		if (onlyowned)
+		{
+			duk_get_prop_string(ctx, oidx, "\xFF" "_obj_owns");
+			bool isowned = duk_is_boolean(ctx, -1) && duk_get_boolean(ctx, -1) != 0;
+			duk_pop(ctx);
+
+			if (!isowned)
+				return false;
+		}
 		return ptr;
 	}
 

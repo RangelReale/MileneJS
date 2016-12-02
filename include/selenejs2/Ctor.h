@@ -21,7 +21,7 @@ public:
 			}
 			// -1 is "this", an already created object
 			void *addr = static_cast<void*>(new T(args...));
-			detail::Properties::obj_put_ptr(ctx, -1, addr);
+			detail::Properties::obj_put_ptr(ctx, -1, addr, true);
 			// prototype will be inherited automatically
            }) {
 		detail::Properties::function_push_with_ptr(ctx, &detail::_js_dispatcher, DUK_VARARGS, (void *)static_cast<BaseFun *>(this));

@@ -58,6 +58,7 @@ void test_base()
 class T1 {
 public:
 	T1() : _v1(76) {}
+	~T1() {}
 
 	void setV1(int v1) { _v1 = v1; }
 	int getV1() { return _v1; }
@@ -86,7 +87,6 @@ void testPrototypeRegistry()
 	ctx.global().SetClassCustom<T2, void, void>("T2", "setV1", &T2::setV1, "getV1", &T2::getV1);
 
 	ctx("var t1 = new T1();");
-	//ctx("var t2 = new T2();");
 	ctx("var t1v1 = t1.getV1();");
 	ctx("t1.setV1(9167); var t1v1new = t1.getV1();");
 
@@ -94,10 +94,18 @@ void testPrototypeRegistry()
 	std::cout << ctx["t1v1new"].get<int>() << std::endl;
 
 	T1 vt1;
+	vt1.setV1(4444);
 	ctx.global().SetClassObj("vt1", vt1);
 
 	ctx("vt1.setV1(667231); var vt1data = vt1.getV1();");
 	std::cout << ctx["vt1data"].get<int>() << std::endl;
+
+	T2 t2;
+	ctx.global().SetClassObj("t2", t2);
+	ctx("var t2v1 = t2.getV1();");
+	std::cout << ctx["t2v1"].get<int>() << std::endl;
+
+	//ctx("var t2 = new T2();");
 
 	/*
 	detail::PrototypeRegistry::Create(ctx);

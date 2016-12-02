@@ -18,7 +18,7 @@ public:
     }
 
     int Apply(duk_context *ctx) {
-		T *t = (T *)detail::Properties::obj_get_ptr(ctx, 0);
+		T *t = (T *)detail::Properties::obj_get_ptr(ctx, 0, true);
 		if (t)
 			t->~T();
         return 0;
