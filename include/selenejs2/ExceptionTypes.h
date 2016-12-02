@@ -68,21 +68,24 @@ public:
 // gets message and possible traceback from Error object
 inline std::string ErrorMessage(duk_context *L, duk_idx_t index) {
 	std::string ret;
+	duk_idx_t eindex = duk_normalize_index(L, index);
+
 	// TODO: check if index is really an error object
 	// gets the "stack" property of the Error object
-	duk_get_prop_string(L, index, "stack");
-	if (duk_is_string(L, -1)) {
-		size_t size;
-		const char *buff = duk_get_lstring(L, -1, &size);
-		ret = std::string{ buff, size };
+	if (duk_is_object(L, eindex)) {
+		duk_get_prop_string(L, eindex, "stack");
+		if (duk_is_string(L, -1)) {
+			size_t size;
+			const char *buff = duk_get_lstring(L, -1, &size);
+			ret = std::string{ buff, size };
+			duk_pop(L);
+			return ret;
+		}
 		duk_pop(L);
 	}
-	else
-	{
-		duk_pop(L);
-		// gets message from object using ToString()
-		ret = duk_safe_to_string(L, index);
-	}
+
+	// gets message from object using ToString()
+	ret = duk_safe_to_string(L, eindex);
 	return ret;
 }
 

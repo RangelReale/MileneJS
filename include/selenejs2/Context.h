@@ -22,12 +22,14 @@ public:
 		BaseContext(), _ctx(duk_create_heap_default()), _owns_context(true)
 	{
 		detail::duv_ref_setup(_ctx);
+		_registry.reset(new Registry(_ctx));
 	}
 
 	Context(duk_context *ctx) :
 		BaseContext(), _ctx(ctx), _owns_context(false)
 	{
 		detail::duv_ref_setup(ctx);
+		_registry.reset(new Registry(_ctx));
 	}
 
 	~Context()
@@ -65,9 +67,16 @@ public:
 		return global().setRef(name, std::forward<T>(value));
 	}
 
+
+	Registry &registry() override
+	{
+		return *_registry;
+	}
+
 private:
 	duk_context *_ctx;
 	bool _owns_context;
+	std::unique_ptr<Registry> _registry;
 };
 
 }

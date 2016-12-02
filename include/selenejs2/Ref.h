@@ -4,6 +4,7 @@
 #include "ResourceHandler.h"
 #include "ExceptionTypes.h"
 #include "Type.h"
+#include "Class.h"
 #include "detail/refs.h"
 #include "detail/value.h"
 #include "detail/refsholder.h"
@@ -216,6 +217,32 @@ public:
 		}
 		duk_pop(*_ctx); // enum
 		return ret;
+	}
+
+	template <typename T, typename... Args, typename... Funs>
+	void SetClass(const std::string &name, Funs... funs) {
+		ResetStackOnScopeExit r(*_ctx);
+		auto fun_tuple = std::make_tuple(std::forward<Funs>(funs)...);
+		push();
+		typename detail::_indices_builder<sizeof...(Funs)>::type d;
+		_ctx->registry().RegisterClass<T, Args...>(name, fun_tuple, d);
+		if (duk_is_undefined(*_ctx, -1) == 0) {
+			// set name as constructor function
+			duk_put_prop_string(*_ctx, -2, name.c_str());
+		}
+	}
+
+	template <typename T, typename Constructor, typename Destructor, typename... Funs>
+	void SetClassCustom(const std::string &name, Funs... funs) {
+		ResetStackOnScopeExit r(*_ctx);
+		auto fun_tuple = std::make_tuple(std::forward<Funs>(funs)...);
+		push();
+		typename detail::_indices_builder<sizeof...(Funs)>::type d;
+		_ctx->registry().RegisterClassCustom<T, Constructor, Destructor>(name, fun_tuple, d);
+		if (duk_is_undefined(*_ctx, -1) == 0) {
+			// set name as constructor function
+			duk_put_prop_string(*_ctx, -2, name.c_str());
+		}
 	}
 
 	BaseContext *ctx() const { return _ctx; }
