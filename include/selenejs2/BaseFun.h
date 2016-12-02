@@ -7,8 +7,7 @@
 #include "detail/primitives.h"
 #include <tuple>
 #include "detail/properties.h"
-//#include "util.h"
-//#include "metatable.h"
+#include "detail/value.h"
 
 namespace seljs2 {
 struct BaseFun {
@@ -20,8 +19,12 @@ namespace detail {
 
 inline duk_ret_t _js_dispatcher(duk_context *ctx) {
 	duk_push_this(ctx);
+	
+	// get function ptr
 	duk_push_current_function(ctx);
     BaseFun *fun = (BaseFun *)detail::Properties::function_get_ptr(ctx, -1);
+	duk_pop(ctx); // pop function
+
     //_js_check_get raiseParameterConversionError = nullptr;
     const char * wrong_meta_table = nullptr;
     int erroneousParameterIndex = 0;
@@ -72,7 +75,7 @@ inline Ret _lift(std::function<Ret(Args...)> fun,
 
 template <typename... T, std::size_t... N>
 inline std::tuple<T...> _get_args(duk_context *state, _indices<N...>) {
-    return std::tuple<T...>{_check_get(_id<T>{}, state, N)...};
+    return std::tuple<T...>{_check_get(detail::_id<T>{}, state, N)...};
 }
 
 template <typename... T>

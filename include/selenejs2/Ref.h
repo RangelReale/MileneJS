@@ -109,7 +109,7 @@ public:
 	{
 		ResetStackOnScopeExit r(*_ctx);
 		push();
-		return detail::_get<T>(*_ctx, -1);
+		return detail::_get<T>(detail::_id<T>{}, *_ctx, -1);
 	}
 
 	template<typename T>
@@ -117,7 +117,7 @@ public:
 	{
 		ResetStackOnScopeExit r(*_ctx);
 		push();
-		return detail::_cast<T>(*_ctx, -1);
+		return detail::_cast<T>(detail::_id<T>{}, *_ctx, -1);
 	}
 
 	template<typename T>

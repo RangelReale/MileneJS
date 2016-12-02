@@ -1,12 +1,11 @@
 #pragma once
 
-//#include "ClassFun.h"
+#include "ClassFun.h"
 #include "Ctor.h"
 #include "Dtor.h"
 #include "detail/PrototypeRegistry.h"
 #include <map>
 #include <memory>
-//#include "util.h"
 #include <vector>
 #include <stack>
 
@@ -28,8 +27,8 @@ private:
     std::string _prototype_name;
     std::unique_ptr<BaseFun> _ctor;
     std::unique_ptr<BaseFun> _dtor;
-    //using Funs = std::vector<std::unique_ptr<BaseFun>>;
-    //Funs _funs;
+    using Funs = std::vector<std::unique_ptr<BaseFun>>;
+    Funs _funs;
 
 	template <typename AX = A>
 	typename std::enable_if<std::is_void<AX>::value>::type
@@ -55,7 +54,6 @@ private:
         _dtor.reset(new B(ctx, _prototype_name.c_str()));
     }
 
-	/*
 	template <typename M>
     void _register_member(duk_context *ctx,
                           const char *member_name,
@@ -73,17 +71,17 @@ private:
             return t->*member;
         };
         _funs.emplace_back(
-            seljs::make_unique<ClassFun<1, T, M>>(
+			std::make_unique<ClassFun<1, T, M>>(
                 ctx, std::string{member_name},
-                _metatable_name.c_str(), lambda_get));
+                lambda_get));
 
         std::function<void(T*, M)> lambda_set = [member](T *t, M value) {
             (t->*member) = value;
         };
         _funs.emplace_back(
-            seljs::make_unique<ClassFun<0, T, void, M>>(
+			std::make_unique<ClassFun<0, T, void, M>>(
                 ctx, std::string("set_") + member_name,
-                _metatable_name.c_str(), lambda_set));
+                lambda_set));
     }
 
     template <typename M>
@@ -95,9 +93,9 @@ private:
             return t->*member;
         };
         _funs.emplace_back(
-            seljs::make_unique<ClassFun<1, T, M>>(
+			std::make_unique<ClassFun<1, T, M>>(
                 ctx, std::string{member_name},
-                _metatable_name.c_str(), lambda_get));
+                lambda_get));
     }
 
     template <typename Ret, typename... Args>
@@ -109,9 +107,9 @@ private:
         };
         constexpr int arity = detail::_arity<Ret>::value;
         _funs.emplace_back(
-            seljs::make_unique<ClassFun<arity, T, Ret, Args...>>(
+			std::make_unique<ClassFun<arity, T, Ret, Args...>>(
                 ctx, std::string(fun_name),
-                _metatable_name.c_str(), lambda));
+                lambda));
     }
 
     template <typename Ret, typename... Args>
@@ -123,9 +121,9 @@ private:
         };
         constexpr int arity = detail::_arity<Ret>::value;
         _funs.emplace_back(
-            seljs::make_unique<ClassFun<arity, T, Ret, Args...>>(
+            std::make_unique<ClassFun<arity, T, Ret, Args...>>(
                 ctx, std::string(fun_name),
-                _metatable_name.c_str(), lambda));
+                lambda));
     }
 
     template <typename Ret, typename... Args>
@@ -138,9 +136,9 @@ private:
             };
         constexpr int arity = detail::_arity<Ret>::value;
         _funs.emplace_back(
-            seljs::make_unique<ClassFun<arity, const T, Ret, Args...>>(
+			std::make_unique<ClassFun<arity, const T, Ret, Args...>>(
                 ctx, std::string(fun_name),
-                _metatable_name.c_str(), lambda));
+                lambda));
     }
 
     void _register_members(duk_context *ctx) {}
@@ -153,7 +151,6 @@ private:
         _register_member(ctx, name, member);
         _register_members(ctx, members...);
     }
-	*/
 public:
     Class(duk_context *ctx,
           const std::string &name,
@@ -162,13 +159,15 @@ public:
         detail::PrototypeRegistry::PushNewPrototype(ctx, typeid(T), _prototype_name);
 		_register_dtor(ctx);
         _register_ctor(ctx);
-        //_register_members(ctx, members...);
+        _register_members(ctx, members...);
 
 		// leave constructor function on the stack
 		duk_get_prop_string(ctx, -1, "\xFF" "constructor");
 		if (duk_is_function(ctx, -1)) {
-			duk_insert(ctx, -2); // invert with the prototype
-			duk_set_prototype(ctx, -2); // set the prototype of the constructor function
+			// invert with the prototype
+			duk_insert(ctx, -2); 
+			// set the prototype of the constructor function
+			duk_put_prop_string(ctx, -2, "prototype"); // MUST set by prop, duk_set_prototype doesn't work for this case!
 		}
 		else {
 			duk_pop(ctx);

@@ -2,9 +2,9 @@
 
 #include "BaseFun.h"
 #include <string>
-#include "lmetatable.h"
+#include "detail/properties.h"
 
-namespace seljs {
+namespace seljs2 {
 
 template <int N, typename T, typename Ret, typename... Args>
 class ClassFun : public BaseFun {
@@ -12,36 +12,33 @@ private:
     using _fun_type = std::function<Ret(T*, Args...)>;
     _fun_type _fun;
     std::string _name;
-    std::string _metatable_name;
 
-    T *_get(duk_context *state) {
+    T *_get(duk_context *ctx) {
 		// get obj from "this" bindind
-		T *ret = (T *)duv_get_obj_ptr(state, -2);
+		T *ret = (T *)detail::Properties::obj_get_ptr(ctx, -1);
         return ret;
     }
 
 public:
-    ClassFun(duk_context *l,
+    ClassFun(duk_context *ctx,
              const std::string &name,
-             const std::string &metatable_name,
              Ret(*fun)(Args...))
-        : ClassFun(l, name, _fun_type{fun}) {}
+        : ClassFun(ctx, name, _fun_type{fun}) {}
 
-    ClassFun(duk_context *l,
+    ClassFun(duk_context *ctx,
              const std::string &name,
-             const std::string &metatable_name,
              _fun_type fun)
-        : _fun(fun), _name(name), _metatable_name(metatable_name) {
-		duv_push_c_function_ptr(l, &detail::_js_dispatcher, DUK_VARARGS, (void *)static_cast<BaseFun *>(this));
-		duk_put_prop_string(l, -2, name.c_str());
+        : _fun(fun), _name(name) {
+		detail::Properties::function_push_with_ptr(ctx, &detail::_js_dispatcher, DUK_VARARGS, (void *)static_cast<BaseFun *>(this));
+		duk_put_prop_string(ctx, -2, name.c_str());
     }
 
-    int Apply(duk_context *l) {
-		// "this" is at index -2
-        std::tuple<T*> t = std::make_tuple(_get(l));
-        std::tuple<Args...> args = detail::_get_args<Args...>(l);
+    int Apply(duk_context *ctx) {
+		// "this" is at index -1
+        std::tuple<T*> t = std::make_tuple(_get(ctx));
+        std::tuple<Args...> args = detail::_get_args<Args...>(ctx);
         std::tuple<T*, Args...> pack = std::tuple_cat(t, args);
-        detail::_push(l, detail::_lift(_fun, pack));
+        detail::_push(ctx, detail::_lift(_fun, pack));
         return N;
     }
 };
@@ -52,34 +49,31 @@ private:
     using _fun_type = std::function<void(T*, Args...)>;
     _fun_type _fun;
     std::string _name;
-    std::string _metatable_name;
 
-    T *_get(duk_context *state) {
+    T *_get(duk_context *ctx) {
 		// get obj from "this" binding
-		T *ret = (T *)duv_get_obj_ptr(state, -2);
+		T *ret = (T *)detail::Properties::obj_get_ptr(ctx, -1);
 		return ret;
     }
 
 public:
-    ClassFun(duk_context *l,
+    ClassFun(duk_context *ctx,
              const std::string &name,
-             const std::string &metatable_name,
              void(*fun)(Args...))
-        : ClassFun(l, name, metatable_name, _fun_type{fun}) {}
+        : ClassFun(ctx, name, _fun_type{fun}) {}
 
-    ClassFun(duk_context *l,
+    ClassFun(duk_context *ctx,
              const std::string &name,
-             const std::string &metatable_name,
              _fun_type fun)
-        : _fun(fun), _name(name), _metatable_name(metatable_name) {
-		duv_push_c_function_ptr(l, &detail::_js_dispatcher, DUK_VARARGS, (void *)static_cast<BaseFun *>(this));
-		duk_put_prop_string(l, -2, name.c_str());
+        : _fun(fun), _name(name) {
+		detail::Properties::function_push_with_ptr(ctx, &detail::_js_dispatcher, DUK_VARARGS, (void *)static_cast<BaseFun *>(this));
+		duk_put_prop_string(ctx, -2, name.c_str());
     }
 
-    int Apply(duk_context *l) {
-		// "this" is at index -2
-		std::tuple<T*> t = std::make_tuple(_get(l));
-        std::tuple<Args...> args = detail::_get_args<Args...>(l);
+    int Apply(duk_context *ctx) {
+		// "this" is at index -1
+		std::tuple<T*> t = std::make_tuple(_get(ctx));
+        std::tuple<Args...> args = detail::_get_args<Args...>(ctx);
         std::tuple<T*, Args...> pack = std::tuple_cat(t, args);
         detail::_lift(_fun, pack);
         return 0;

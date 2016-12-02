@@ -15,39 +15,25 @@ struct value_t;
 template <typename T>
 using value = value_t<typename std::decay<T>::type>;
 
-/*
 template<typename T>
 T _get(_id<T> id, duk_context *ctx, duk_idx_t index) {
-	return value<T>::_get(ctx, index);
-}
-
-template <typename T>
-T _pop(_id<T> id, duk_context *ctx) {
-	T ret = ::seljs::detail::_get(id, ctx, -1);
-	duk_pop(l);
-	return ret;
-}
-
-template <typename T>
-void _push(duk_context *ctx, T&& t) {
-	value<T>::push(ctx, std::forward<T>(t));
-}
-*/
-
-template<typename T>
-T _get(duk_context *ctx, duk_idx_t index) {
 	return value<T>::get(ctx, index);
 }
 
 template<typename T>
-T _cast(duk_context *ctx, duk_idx_t index) {
+T _check_get(_id<T> id, duk_context *ctx, duk_idx_t index) {
+	return value<T>::require(ctx, index);
+}
+
+template<typename T>
+T _cast(_id<T> id, duk_context *ctx, duk_idx_t index) {
 	ResetStackOnScopeExit r(ctx);
 	duk_dup(ctx, index);
 	return value<T>::to(ctx, -1);
 }
 
 template <typename T>
-T _pop(duk_context *ctx) {
+T _pop(_id<T> id, duk_context *ctx) {
 	T ret = ::seljs2::detail::_get<T>(ctx, -1);
 	duk_pop(ctx);
 	return ret;

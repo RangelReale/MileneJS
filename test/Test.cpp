@@ -83,13 +83,15 @@ void testPrototypeRegistry()
 	Context ctx;
 	ctx.global().SetClass<T1>("T1", "setV1", &T1::setV1, "getV1", &T1::getV1);
 
-	ctx.global().SetClassCustom<T2, void, void>("T2", "setV1", &T1::setV1, "getV1", &T1::getV1);
+	ctx.global().SetClassCustom<T2, void, void>("T2", "setV1", &T2::setV1, "getV1", &T2::getV1);
 
 	ctx("var t1 = new T1();");
 	//ctx("var t2 = new T2();");
 	ctx("var t1v1 = t1.getV1();");
+	ctx("t1.setV1(9167); var t1v1new = t1.getV1();");
 
 	std::cout << ctx["t1v1"].get<int>() << std::endl;
+	std::cout << ctx["t1v1new"].get<int>() << std::endl;
 
 	/*
 	detail::PrototypeRegistry::Create(ctx);

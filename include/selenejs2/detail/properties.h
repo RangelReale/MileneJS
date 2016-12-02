@@ -27,12 +27,12 @@ namespace Properties {
 		return ptr;
 	}
 
-	// push an object with an associated void*, leaves object on the stack
-	static inline void obj_push_with_ptr(duk_context *ctx, void *ptr)
+	// put an associated void* to object at index, leaves object on the stack
+	static inline void obj_put_ptr(duk_context *ctx, duk_idx_t index, void *ptr)
 	{
-		duk_push_object(ctx);
+		duk_idx_t oidx = duk_normalize_index(ctx, index);
 		duk_push_pointer(ctx, ptr);
-		duk_put_prop_string(ctx, -2, "\xFF" "_obj");
+		duk_put_prop_string(ctx, oidx, "\xFF" "_obj");
 	}
 
 	// return ptr of object at index
