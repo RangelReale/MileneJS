@@ -3,7 +3,7 @@
 #include "Class.h"
 #include "ClassObj.h"
 #include <functional>
-//#include "Fun.h"
+#include "Fun.h"
 #include "detail/PrototypeRegistry.h"
 //#include "Obj.h"
 //#include "util.h"
@@ -24,7 +24,7 @@ struct lambda_traits<Ret(T::*)(Args...) const> {
 }
 class Registry {
 private:
-    //std::vector<std::unique_ptr<BaseFun>> _funs;
+    std::vector<std::unique_ptr<BaseFun>> _funs;
     //std::vector<std::unique_ptr<BaseObj>> _objs;
     std::unordered_map<std::type_index, std::shared_ptr<BaseClass>> _classes;
 	std::vector<std::unique_ptr<BaseClassObj>> _classobjs;
@@ -34,7 +34,6 @@ public:
         detail::PrototypeRegistry::Create(_ctx);
     }
 
-	/*
 	template <typename L>
     void Register(L lambda) {
         Register((typename detail::lambda_traits<L>::Fun)(lambda));
@@ -44,16 +43,16 @@ public:
     void Register(std::function<Ret(Args...)> fun) {
         constexpr int arity = detail::_arity<Ret>::value;
         _funs.emplace_back(
-            seljs::make_unique<Fun<arity, Ret, Args...>>(
-                _state, fun));
+            std::make_unique<Fun<arity, Ret, Args...>>(
+                _ctx, fun));
     }
 
     template <typename Ret, typename... Args>
     void Register(Ret (*fun)(Args...)) {
         constexpr int arity = detail::_arity<Ret>::value;
         _funs.emplace_back(
-            seljs::make_unique<Fun<arity, Ret, Args...>>(
-                _state, fun));
+            std::make_unique<Fun<arity, Ret, Args...>>(
+                _ctx, fun));
     }
 
     template <typename T, typename... Funs>
@@ -62,14 +61,15 @@ public:
                  typename detail::_indices_builder<sizeof...(Funs)>::type{});
     }
 
-    template <typename T, typename... Funs, size_t... N>
+	/*
+	template <typename T, typename... Funs, size_t... N>
     void Register(T &t, std::tuple<Funs...> funs, detail::_indices<N...>) {
         RegisterObj(t, std::get<N>(funs)...);
     }
 
     template <typename T, typename... Funs>
     void RegisterObj(T &t, Funs... funs) {
-        _objs.emplace_back(seljs::make_unique<Obj<T, Funs...>>(_state, &t, funs...));
+        _objs.emplace_back(std::make_unique<Obj<T, Funs...>>(_ctx, &t, funs...));
     }
 	*/
 

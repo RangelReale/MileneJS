@@ -219,6 +219,33 @@ public:
 		return ret;
 	}
 
+	template <typename L>
+	void Register(const std::string &name, L lambda)
+	{
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		_ctx->registry().Register(lambda);
+		duk_put_prop_string(*_ctx, -2, name.c_str());
+	}
+
+	template <typename Ret, typename... Args>
+	void Register(const std::string &name, std::function<Ret(Args...)> fun)
+	{
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		_ctx->registry().Register(fun);
+		duk_put_prop_string(*_ctx, -2, name.c_str());
+	}
+
+	template <typename Ret, typename... Args>
+	void Register(const std::string &name, Ret(*fun)(Args...))
+	{
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		_ctx->registry().Register(fun);
+		duk_put_prop_string(*_ctx, -2, name.c_str());
+	}
+
 	template <typename T, typename... Args, typename... Funs>
 	void SetClass(const std::string &name, Funs... funs) {
 		ResetStackOnScopeExit r(*_ctx);

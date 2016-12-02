@@ -79,6 +79,11 @@ private:
 };
 class T3 {};
 
+int testfunc(int a, int b)
+{
+	return a + b;
+}
+
 void testPrototypeRegistry()
 {
 	Context ctx;
@@ -106,6 +111,10 @@ void testPrototypeRegistry()
 	std::cout << ctx["t2v1"].get<int>() << std::endl;
 
 	//ctx("var t2 = new T2();");
+
+	ctx.global().Register("testfunc", &testfunc);
+	ctx("var tf = testfunc(10, 20);");
+	std::cout << ctx["tf"].get<int>() << std::endl;
 
 	/*
 	detail::PrototypeRegistry::Create(ctx);
