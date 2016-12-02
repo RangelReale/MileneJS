@@ -164,9 +164,9 @@ public:
 		// leave constructor function on the stack
 		duk_get_prop_string(ctx, -1, "\xFF" "constructor");
 		if (duk_is_function(ctx, -1)) {
-			// invert with the prototype
-			duk_insert(ctx, -2); 
 			// set the prototype of the constructor function
+			// invert with the prototype
+			duk_insert(ctx, -2); // [constructor, prototype]
 			duk_put_prop_string(ctx, -2, "prototype"); // MUST set by prop, duk_set_prototype doesn't work for this case!
 		}
 		else {

@@ -116,6 +116,13 @@ void testPrototypeRegistry()
 	ctx("var tf = testfunc(10, 20);");
 	std::cout << ctx["tf"].get<int>() << std::endl;
 
+	ctx("function testcalc(a, b) { return a+b+10; };");
+	std::cout << ctx.global()["testcalc"](10, 30).get<int>() << std::endl;
+
+	std::cout << ctx["t1"].call("getV1").get<int>() << std::endl;
+
+	std::cout << ctx["t1"].callMethod(ctx["t1"], "getV1").get<int>() << std::endl;
+
 	/*
 	detail::PrototypeRegistry::Create(ctx);
 	detail::PrototypeRegistry::PushNewPrototype(ctx, typeid(T1), "T1");

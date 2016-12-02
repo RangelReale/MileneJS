@@ -206,6 +206,52 @@ public:
 		return duk_get_length(*_ctx, -1);
 	}
 
+	template <typename... Args>
+	Ref operator()(Args... args) {
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		int params = duk_get_top(*_ctx);
+		detail::_push_n(*_ctx, args...);
+		params = duk_get_top(*_ctx) - params;
+		duk_int_t status = duk_pcall(*_ctx, params);
+		if (status != DUK_EXEC_SUCCESS) {
+			throw SeleneJSException(ErrorMessage(*_ctx, -1));
+		}
+		return Ref(_ctx);
+	}
+
+	template <typename... Args>
+	Ref call(const std::string &method, Args... args) {
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		int obj_idx = duk_get_top_index(*_ctx);
+		duk_push_string(*_ctx, method.c_str()); // key
+		int params = duk_get_top(*_ctx);
+		detail::_push_n(*_ctx, args...);
+		params = duk_get_top(*_ctx) - params;
+		duk_int_t status = duk_pcall_prop(*_ctx, obj_idx, params);
+		if (status != DUK_EXEC_SUCCESS) {
+			throw SeleneJSException(ErrorMessage(*_ctx, -1));
+		}
+		return Ref(_ctx);
+	}
+
+	template <typename... Args>
+	Ref callMethod(const Ref &fthis, const std::string &method, Args... args) {
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		duk_get_prop_string(*_ctx, -1, method.c_str()); // func
+		fthis.push(); // push passed "this"
+		int params = duk_get_top(*_ctx);
+		detail::_push_n(*_ctx, args...);
+		params = duk_get_top(*_ctx) - params;
+		duk_int_t status = duk_pcall_method(*_ctx, params);
+		if (status != DUK_EXEC_SUCCESS) {
+			throw SeleneJSException(ErrorMessage(*_ctx, -1));
+		}
+		return Ref(_ctx);
+	}
+
 	std::vector<std::string> keyList(duk_uint_t enum_flags = 0) const {
 		ResetStackOnScopeExit r(*_ctx);
 		push();
