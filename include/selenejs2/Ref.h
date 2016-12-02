@@ -245,6 +245,15 @@ public:
 		}
 	}
 
+	template <typename T>
+	void SetClassObj(const std::string &name, T &t) {
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		_ctx->registry().RegisterClassObj(t);
+		duk_put_prop_string(*_ctx, -2, name.c_str());
+		duk_pop(*_ctx);
+	}
+
 	BaseContext *ctx() const { return _ctx; }
 private:
 	BaseContext *_ctx;

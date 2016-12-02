@@ -93,6 +93,12 @@ void testPrototypeRegistry()
 	std::cout << ctx["t1v1"].get<int>() << std::endl;
 	std::cout << ctx["t1v1new"].get<int>() << std::endl;
 
+	T1 vt1;
+	ctx.global().SetClassObj("vt1", vt1);
+
+	ctx("vt1.setV1(667231); var vt1data = vt1.getV1();");
+	std::cout << ctx["vt1data"].get<int>() << std::endl;
+
 	/*
 	detail::PrototypeRegistry::Create(ctx);
 	detail::PrototypeRegistry::PushNewPrototype(ctx, typeid(T1), "T1");

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Class.h"
-//#include "ClassObj.h"
+#include "ClassObj.h"
 #include <functional>
 //#include "Fun.h"
 #include "detail/PrototypeRegistry.h"
@@ -27,7 +27,7 @@ private:
     //std::vector<std::unique_ptr<BaseFun>> _funs;
     //std::vector<std::unique_ptr<BaseObj>> _objs;
     std::unordered_map<std::type_index, std::shared_ptr<BaseClass>> _classes;
-	//std::vector<std::unique_ptr<BaseClassObj>> _classobjs;
+	std::vector<std::unique_ptr<BaseClassObj>> _classobjs;
 	duk_context *_ctx;
 public:
     Registry(duk_context *ctx) : _ctx(ctx) {
@@ -103,7 +103,7 @@ public:
 
 	template <typename T>
 	void RegisterClassObj(T &t) {
-		_classobjs.emplace_back(seljs::make_unique<ClassObj<T>>(_state, &t));
+		_classobjs.emplace_back(std::make_unique<ClassObj<T>>(_ctx, &t));
 	}
 };
 }
