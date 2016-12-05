@@ -215,7 +215,7 @@ public:
 		params = duk_get_top(*_ctx) - params;
 		duk_int_t status = duk_pcall(*_ctx, params);
 		if (status != DUK_EXEC_SUCCESS) {
-			throw MileneJSException(ErrorMessage(*_ctx, -1));
+			ThrowError(*_ctx, -1);
 		}
 		return Ref(_ctx);
 	}
@@ -231,7 +231,7 @@ public:
 		params = duk_get_top(*_ctx) - params;
 		duk_int_t status = duk_pcall_prop(*_ctx, obj_idx, params);
 		if (status != DUK_EXEC_SUCCESS) {
-			throw MileneJSException(ErrorMessage(*_ctx, -1));
+			ThrowError(*_ctx, -1);
 		}
 		return Ref(_ctx);
 	}
@@ -247,7 +247,7 @@ public:
 		params = duk_get_top(*_ctx) - params;
 		duk_int_t status = duk_pcall_method(*_ctx, params);
 		if (status != DUK_EXEC_SUCCESS) {
-			throw MileneJSException(ErrorMessage(*_ctx, -1));
+			ThrowError(*_ctx, -1);
 		}
 		return Ref(_ctx);
 	}

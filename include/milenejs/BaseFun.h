@@ -25,38 +25,19 @@ inline duk_ret_t _js_dispatcher(duk_context *ctx) {
     BaseFun *fun = (BaseFun *)detail::Properties::function_get_ptr(ctx, -1);
 	duk_pop(ctx); // pop function
 
-    //_js_check_get raiseParameterConversionError = nullptr;
-    const char * wrong_meta_table = nullptr;
-    int erroneousParameterIndex = 0;
     try {
         return fun->Apply(ctx);
-    /*} catch (GetParameterFromJSTypeError & e) {
-        raiseParameterConversionError = e.checked_get;
-        erroneousParameterIndex = e.index;
-    } catch (GetUserdataParameterFromJSTypeError & e) {
-        wrong_meta_table = duk_push_lstring(
-            l, e.metatable_name.c_str(), e.metatable_name.length());
-        erroneousParameterIndex = e.index;*/
     } catch (std::exception &e) {
 		if (duk_is_error(ctx, -1) == 0) {
 			duk_push_error_object(ctx, DUK_ERR_ERROR, e.what());
 		}
-		//store_current_exception(ctx, e.what());
+		detail::Properties::error_put_exception(ctx, -1, std::current_exception());
 		duk_throw(ctx);
     } catch (...) {
 		if (duk_is_error(ctx, -1) == 0)
 			throw;
 		duk_throw(ctx);
 	}
-	/*
-    if(raiseParameterConversionError) {
-        raiseParameterConversionError(l, erroneousParameterIndex);
-    }
-    else if(wrong_meta_table) {
-		// TODO: don't know if this is right
-        duvL_checkudata(l, erroneousParameterIndex, wrong_meta_table);
-    }
-	*/
 	return DUK_RET_ERROR;
 }
 

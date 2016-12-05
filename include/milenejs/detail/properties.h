@@ -2,6 +2,8 @@
 
 #include <duktape.h>
 
+#include <exception>
+
 namespace miljs {
 namespace detail {
 
@@ -66,6 +68,50 @@ namespace Properties {
 		void* ptr = duk_require_pointer(ctx, -1);
 		duk_pop(ctx);
 		return ptr;
+	}
+
+	struct error_exception
+	{
+		std::exception_ptr exception;
+	};
+
+	// error finalizer
+	inline duk_ret_t error_finalizer(duk_context *ctx)
+	{
+		duk_get_prop_string(ctx, 0, "\xFF" "_exception");
+		if (duk_is_pointer(ctx, -1))
+		{
+			error_exception *ee = static_cast<error_exception *>(duk_get_pointer(ctx, -1));
+			delete ee;
+			duk_del_prop_string(ctx, 0, "\xFF" "_exception");
+		}
+		duk_pop(ctx);
+
+		return 0;
+	}
+
+	// store exception into error object
+	inline void error_put_exception(duk_context *ctx, duk_idx_t index, std::exception_ptr e)
+	{
+		duk_idx_t eidx = duk_normalize_index(ctx, index);
+
+		error_exception* ee = new error_exception{ e };
+		duk_push_pointer(ctx, static_cast<void*>(ee));
+		duk_put_prop_string(ctx, eidx, "\xFF" "_exception");
+		duk_push_c_function(ctx, &error_finalizer, 1);
+		duk_set_finalizer(ctx, eidx);
+	}
+
+	// get exception from error object
+	inline void error_throw_exception(duk_context *ctx, duk_idx_t index)
+	{
+		duk_get_prop_string(ctx, index, "\xFF" "_exception");
+		if (duk_is_pointer(ctx, -1))
+		{
+			error_exception *ee = static_cast<error_exception *>(duk_get_pointer(ctx, -1));
+			std::rethrow_exception(ee->exception);
+		}
+		duk_pop(ctx);
 	}
 
 }

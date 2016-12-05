@@ -143,11 +143,59 @@ void testPrototypeRegistry()
 	*/
 }
 
+class ExampleException : public std::exception {
+	std::string _message;
+public:
+	explicit ExampleException(const std::string &message)
+		: _message(message) {}
+	char const * what() const noexcept override {
+		return _message.c_str();
+	}
+};
+
+void te_throw()
+{
+	throw ExampleException("test throw");
+}
+
+void te_wrongparam(int v)
+{
+	std::cout << v << std::endl;
+}
+
+void testError()
+{
+	Context ctx;
+
+	//ctx.load("non_existent_file.js");
+
+	/*
+	ctx(R"(
+		function syntax_error() {
+		1 2 3 4
+	}
+	)");
+	*/
+
+	//ctx["undefined_function"]();
+
+	ctx.global().Register("te_throw", &te_throw);
+	ctx["te_throw"]();
+
+	//ctx.global().Register("te_wrongparam", &te_wrongparam);
+	//ctx["te_wrongparam"]("string");
+}
+
 int main() {
 
 	try {
 		//test_base();
-		testPrototypeRegistry();
+		//testPrototypeRegistry();
+		testError();
+	}
+	catch (MileneJSException &e) {
+		std::cout << e.what() << std::endl;
+		std::cout << e.stack() << std::endl;
 	}
 	catch (std::exception &e) {
 		std::cout << e.what() << std::endl;
