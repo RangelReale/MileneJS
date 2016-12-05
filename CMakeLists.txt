@@ -17,8 +17,11 @@ add_executable(example_runner ${CMAKE_CURRENT_SOURCE_DIR}/example/Test.cpp ${hea
     ../duktape/duk_config.h
 )
 
-include_directories(test)
+#include_directories(test)
 add_executable(test_runner ${CMAKE_CURRENT_SOURCE_DIR}/test/Test.cpp ${headers}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/error_tests.cpp
+
+
     ../duktape/duktape.c
     ../duktape/duktape.h
     ../duktape/duk_config.h
