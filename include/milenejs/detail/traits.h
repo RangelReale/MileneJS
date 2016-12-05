@@ -5,7 +5,7 @@
  * Implements various type trait objects
  */
 
-namespace seljs2 {
+namespace miljs {
 namespace detail {
 
 template <typename T>

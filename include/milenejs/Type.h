@@ -7,7 +7,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace seljs2 {
+namespace miljs {
 
 enum class Type
 {

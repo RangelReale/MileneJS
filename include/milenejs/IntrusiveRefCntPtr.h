@@ -17,7 +17,7 @@
 // LLVM-style casting.
 //
 //===----------------------------------------------------------------------===//
-// Rangel Reale: changed namespace to seljs2 for ease of use
+// Rangel Reale: changed namespace to miljs for ease of use
 
 #ifndef LLVM_ADT_INTRUSIVEREFCNTPTR_H
 #define LLVM_ADT_INTRUSIVEREFCNTPTR_H
@@ -26,7 +26,7 @@
 #include <cassert>
 #include <cstddef>
 
-namespace seljs2 {
+namespace miljs {
 
 //===----------------------------------------------------------------------===//
 /// RefCountedBase - A generic base class for objects that wish to

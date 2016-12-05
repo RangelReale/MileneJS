@@ -9,7 +9,7 @@
 #include "detail/properties.h"
 #include "detail/value.h"
 
-namespace seljs2 {
+namespace miljs {
 struct BaseFun {
     virtual ~BaseFun() {}
     virtual int Apply(duk_context *ctx) = 0;

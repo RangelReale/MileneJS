@@ -6,7 +6,7 @@
 
 #include <type_traits>
 
-namespace seljs2 {
+namespace miljs {
 namespace detail {
 
 template<typename T>
@@ -34,7 +34,7 @@ T _cast(_id<T> id, duk_context *ctx, duk_idx_t index) {
 
 template <typename T>
 T _pop(_id<T> id, duk_context *ctx) {
-	T ret = ::seljs2::detail::_get<T>(ctx, -1);
+	T ret = ::miljs::detail::_get<T>(ctx, -1);
 	duk_pop(ctx);
 	return ret;
 }

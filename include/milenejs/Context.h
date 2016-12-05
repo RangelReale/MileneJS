@@ -4,7 +4,7 @@
 #include "Ref.h"
 #include "detail/refs.h"
 
-namespace seljs2 {
+namespace miljs {
 
 class RefPushGlobal : public RefPush
 {

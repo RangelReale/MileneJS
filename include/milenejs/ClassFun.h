@@ -4,7 +4,7 @@
 #include <string>
 #include "detail/properties.h"
 
-namespace seljs2 {
+namespace miljs {
 
 template <int N, typename T, typename Ret, typename... Args>
 class ClassFun : public BaseFun {

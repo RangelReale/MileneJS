@@ -6,14 +6,14 @@
 #include <typeindex>
 #include <string>
 
-namespace seljs2 {
+namespace miljs {
 namespace detail {
 
 namespace PrototypeRegistry {
 	using TypeID = std::reference_wrapper<const std::type_info>;
 
-	static const char* _prototypes = "selenejs2_prototypes";
-	static const char* _prototype_name_prop = "\xFF" "__selenejs2_prototype_name";
+	static const char* _prototypes = "milenejs_prototypes";
+	static const char* _prototype_name_prop = "\xFF" "__milenejs_prototype_name";
 
 	namespace detail {
 		static inline void _push_prototypes_table(duk_context *state) {

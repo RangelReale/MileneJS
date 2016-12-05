@@ -3,7 +3,7 @@
 #include "detail/PrototypeRegistry.h"
 #include "detail/properties.h"
 
-namespace seljs2 {
+namespace miljs {
 struct BaseClassObj {
     virtual ~BaseClassObj() {}
 };

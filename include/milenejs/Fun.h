@@ -6,7 +6,7 @@
 #include "detail/properties.h"
 //#include "metatable.h"
 
-namespace seljs2 {
+namespace miljs {
 template <int N, typename Ret, typename... Args>
 class Fun : public BaseFun {
 private:

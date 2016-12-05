@@ -1,9 +1,9 @@
-#include <selenejs2.h>
-#include <selenejs2/detail/PrototypeRegistry.h>
+#include <milenejs.h>
+#include <milenejs/detail/PrototypeRegistry.h>
 
 #include <iostream>
 
-using namespace seljs2;
+using namespace miljs;
 
 void test_base()
 {

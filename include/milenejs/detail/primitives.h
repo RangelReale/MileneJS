@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <string>
 
-namespace seljs2 {
+namespace miljs {
 namespace detail {
 
 template <typename T>

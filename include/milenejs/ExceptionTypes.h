@@ -6,21 +6,21 @@
 
 #include <duktape.h>
 
-namespace seljs2 {
+namespace miljs {
 
-class BaseSeleneJSException : public std::exception {};
+class BaseMileneJSException : public std::exception {};
 
-class SeleneJSException : public BaseSeleneJSException {
+class MileneJSException : public BaseMileneJSException {
 	std::string _message;
 public:
-	explicit SeleneJSException(const std::string &message)
+	explicit MileneJSException(const std::string &message)
 		: _message(message) {}
 	char const * what() const noexcept override {
 		return _message.c_str();
 	}
 };
 
-class TypeError : public BaseSeleneJSException {
+class TypeError : public BaseMileneJSException {
     std::string _message;
 public:
     explicit TypeError(std::string expected)
@@ -34,7 +34,7 @@ public:
     }
 };
 
-class CopyUnregisteredType : public BaseSeleneJSException {
+class CopyUnregisteredType : public BaseMileneJSException {
 public:
     using TypeID = std::reference_wrapper<const std::type_info>;
     explicit CopyUnregisteredType(TypeID type) : _type(type) {}
@@ -51,14 +51,14 @@ private:
     TypeID _type;
 };
 
-class NotImplementedError : public BaseSeleneJSException {
+class NotImplementedError : public BaseMileneJSException {
 public:
 	char const * what() const noexcept override {
 		return "Not implemented.";
 	}
 };
 
-class NotSupportedError : public BaseSeleneJSException {
+class NotSupportedError : public BaseMileneJSException {
 public:
 	char const * what() const noexcept override {
 		return "Not supported.";

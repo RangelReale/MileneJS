@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace seljs2 {
+namespace miljs {
 namespace detail {
 
 class refsholder

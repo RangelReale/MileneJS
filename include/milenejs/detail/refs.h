@@ -5,7 +5,7 @@
 #define DUV_NOREF       (-2)
 #define DUV_REFNIL      (-1)
 
-namespace seljs2 {
+namespace miljs {
 namespace detail {
 
 // Create a global array refs in the heap stash.

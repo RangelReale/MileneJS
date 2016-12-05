@@ -12,7 +12,7 @@
 #include <memory>
 #include <typeindex>
 
-namespace seljs2 {
+namespace miljs {
 namespace detail {
 template <typename T>
 struct lambda_traits : public lambda_traits<decltype(&T::operator())> {};

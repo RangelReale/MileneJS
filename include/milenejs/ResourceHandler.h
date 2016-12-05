@@ -2,7 +2,7 @@
 
 #include <duktape.h>
 
-namespace seljs2 {
+namespace miljs {
 
 class MovingFlag {
     bool flag = false;

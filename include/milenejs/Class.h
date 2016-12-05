@@ -9,7 +9,7 @@
 #include <vector>
 #include <stack>
 
-namespace seljs2 {
+namespace miljs {
 
 struct BaseClass {
     virtual ~BaseClass() {}

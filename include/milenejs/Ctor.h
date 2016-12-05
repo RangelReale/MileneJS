@@ -3,7 +3,7 @@
 #include "BaseFun.h"
 #include "detail/properties.h"
 
-namespace seljs2 {
+namespace miljs {
 
 template <typename T, typename... Args>
 class Ctor : public BaseFun {

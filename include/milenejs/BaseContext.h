@@ -9,7 +9,7 @@
 
 #include <memory>
 
-namespace seljs2 {
+namespace miljs {
 
 class BaseContext 
 {
@@ -25,7 +25,7 @@ public:
 		ResetStackOnScopeExit savedStack(ctx());
 		duk_int_t status = duk_peval_string(ctx(), code);
 		if (status != 0) {
-			throw SeleneJSException(ErrorMessage(ctx(), -1));
+			throw MileneJSException(ErrorMessage(ctx(), -1));
 		}
 		duk_pop(ctx());
 	}
