@@ -1,9 +1,6 @@
 #include "catch.hpp"
-
 #include "util.h"
-
 #include <milenejs.h>
-
 #include <string>
 
 using namespace miljs;
@@ -11,12 +8,7 @@ using namespace miljs;
 TEST_CASE("Load error", "[error]") {
 	Context ctx;
 	const char* expected = "no sourcecode";
-	try {
-		ctx.load("../test/non_exist.js");
-	}
-	catch (MileneJSException &e) {
-		CHECK(std::string(e.what()).find(expected) != std::string::npos);
-	}
+	CHECKMILEXCEPTION_STR(ctx.load("../test/non_exist.js"), expected);
 }
 
 TEST_CASE("Load syntax error", "[error]") {
