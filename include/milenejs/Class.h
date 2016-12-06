@@ -155,8 +155,12 @@ public:
     Class(duk_context *ctx,
           const std::string &name,
           Members... members) : _name(name) {
-        _prototype_name = _name + "_lib";
-        detail::PrototypeRegistry::PushNewPrototype(ctx, typeid(T), _prototype_name);
+		if (!_name.empty()) {
+			_prototype_name = _name + "_lib";
+		} else {
+			_prototype_name = "unnamed_object_lib";
+		}
+		detail::PrototypeRegistry::PushNewPrototype(ctx, typeid(T), _prototype_name);
 		_register_dtor(ctx);
         _register_ctor(ctx);
         _register_members(ctx, members...);

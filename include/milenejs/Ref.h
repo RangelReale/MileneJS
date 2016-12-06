@@ -327,6 +327,14 @@ public:
 		duk_pop(*_ctx);
 	}
 
+	template <typename T, typename... Args, typename... Funs>
+	void SetObj(const std::string &name, T &t, Funs... funs) {
+		// set class without constructor or destructor
+		SetClassCustom<T, void, void>("", funs...);
+		// class class object
+		SetClassObj(name, t);
+	}
+
 	BaseContext *ctx() const { return _ctx; }
 private:
 	BaseContext *_ctx;
