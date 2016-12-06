@@ -21,6 +21,7 @@ add_executable(example_runner ${CMAKE_CURRENT_SOURCE_DIR}/example/Test.cpp ${hea
 add_executable(test_runner ${CMAKE_CURRENT_SOURCE_DIR}/test/Test.cpp ${headers}
     ${CMAKE_CURRENT_SOURCE_DIR}/test/error_tests.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/exception_tests.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/interop_tests.cpp
 
     ../duktape/duktape.c
     ../duktape/duktape.h

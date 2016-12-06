@@ -129,9 +129,13 @@ namespace PrototypeRegistry {
 		{
 			detail::_push_prototype(ctx, type);
 			equal = duk_equals(ctx, -1, -2) != 0;
-			duk_pop(ctx);
 		}
-		duk_pop(ctx);
+		else
+		{
+			detail::_push_prototype(ctx, type);
+			equal = duk_is_object(ctx, -1) == 0;
+		}
+		duk_pop_2(ctx);
 
 		return equal;
 	}

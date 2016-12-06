@@ -25,6 +25,20 @@ public:
 	}
 };
 
+class TypeError : public BaseMileneJSException {
+	std::string _message;
+public:
+	explicit TypeError(std::string expected)
+		: _message(std::move(expected)
+			+ " expected, got no object.") {}
+	explicit TypeError(std::string expected, std::string const & actual)
+		: _message(std::move(expected)
+			+ " expected, got " + actual + '.') {}
+	char const * what() const noexcept override {
+		return _message.c_str();
+	}
+};
+
 class NotImplementedError : public BaseMileneJSException {
 public:
 	char const * what() const noexcept override {
