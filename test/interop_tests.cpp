@@ -139,6 +139,133 @@ TEST_CASE("Return value", "[interop]") {
 	ctx.global().SetClass<InstanceCounter>("MyClass");
 	ctx.global().Register("return_value", &return_value);
 	int const instanceCountBeforeCreation = InstanceCounter::instances;
+
 	ctx("globalValue = return_value();");
+
 	CHECK(InstanceCounter::instances == instanceCountBeforeCreation + 1);
+}
+
+TEST_CASE("Return unregistered type", "[interop]") {
+	using namespace test_lifetime;
+	Context ctx;
+	ctx.global().Register("return_value", &return_value);
+	int const instanceCountBeforeCreation = InstanceCounter::instances;
+	CHECK_THROWS_AS(ctx("globalValue = return_value();"), CopyUnregisteredType);
+}
+
+TEST_CASE("Value parameter", "[interop]") {
+	using namespace test_lifetime;
+	Context ctx;
+	ctx.global().SetClass<InstanceCounter>("MyClass");
+	ctx("function acceptValue(value) { valCopy = value; }");
+	int const instanceCountBeforeCreation = InstanceCounter::instances;
+	
+	ctx["acceptValue"](InstanceCounter{});
+
+	CHECK(InstanceCounter::instances == instanceCountBeforeCreation + 1);
+}
+
+TEST_CASE("Wrong value parameter", "[interop]") {
+	using namespace test_lifetime;
+	Context ctx;
+	ctx.global().SetClass<InstanceCounter>("MyClass");
+	ctx("function acceptValue(value) { valCopy = value; }");
+	int const instanceCountBeforeCreation = InstanceCounter::instances;
+
+	try {
+		ctx["acceptValue"](Special{});
+		CHECK(false); // shouldn't reach here
+	}
+	catch (CopyUnregisteredType & e)
+	{
+		CHECK(e.getType().get() == typeid(Special));
+	}
+}
+
+TEST_CASE("Value parameter keeps type info", "[interop]") {
+	using namespace test_lifetime;
+	Context ctx;
+	ctx.global().SetClass<Special>("MyClass");
+	ctx("function acceptValue(value) { valCopy = value; }");
+	ctx["acceptValue"](Special{});
+
+	Special *foo = ctx["valCopy"].get<Special*>();
+
+	CHECK(foo != nullptr);
+}
+
+TEST_CASE("Callback with value", "[interop]") {
+	using namespace test_lifetime;
+	Context ctx;
+	ctx.global().SetClass<InstanceCounter>("MyClass");
+	ctx("val = new MyClass();");
+
+	std::unique_ptr<InstanceCounter> copy;
+	ctx.global().Register("accept", [&copy](InstanceCounter counter) {
+		copy.reset(new InstanceCounter(std::move(counter)));
+	});
+
+	int const instanceCountBeforeCall = InstanceCounter::instances;
+	ctx("accept(val);");
+
+	CHECK(InstanceCounter::instances == instanceCountBeforeCall + 1);
+}
+
+TEST_CASE("nullptr to null", "[interop]") {
+	Context ctx;
+	ctx.global().Register("getNullptr", []() -> void* {
+		return nullptr;
+	});
+	ctx("x = getNullptr();");
+	ctx("result = x == null;");
+	CHECK(ctx["result"].get<bool>() == true);
+}
+
+TEST_CASE("Get primitive by value", "[interop]") {
+	Context ctx;
+	ctx.load("../test/test.js");
+	CHECK(ctx["global1"].get<int>() == 5);
+}
+
+/*
+TEST_CASE("Get primitive by const ref", "[interop]") {
+	Context ctx;
+	ctx.load("../test/test.js");
+	CHECK(ctx["global1"].get<const int &>() == 5);
+}
+
+TEST_CASE("Get primitive by rvalue ref", "[interop]") {
+	Context ctx;
+	ctx.load("../test/test.js");
+	CHECK(ctx["global1"].get<int &&>() == 5);
+}
+*/
+
+TEST_CASE("Call with primitive by value", "[interop]") {
+	Context ctx;
+	bool success = false;
+	auto const accept_int_by_value = [&success](int x) {success = x == 5; };
+	ctx.global().Register("test", accept_int_by_value);
+	ctx["test"](5);
+	CHECK(success == true);
+}
+
+TEST_CASE("Call with primitive by const ref", "[interop]") {
+	Context ctx;
+	bool success = false;
+	auto const accept_int_by_const_ref =
+		[&success](const int & x) {success = x == 5; };
+	ctx.global().Register("test", accept_int_by_const_ref);
+	ctx["test"](5);
+	CHECK(success == true);
+}
+
+TEST_CASE("Call with primitive by rvalue ref", "[interop]") {
+	Context ctx;
+	bool success = false;
+	auto const accept_int_by_rvalue_ref =
+		[&success](int && x) {success = x == 5; };
+	ctx.global().Register("test", accept_int_by_rvalue_ref);
+	ctx["test"](5);
+	CHECK(success == true);
 }

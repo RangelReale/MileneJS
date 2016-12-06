@@ -8,6 +8,14 @@
 #include <string>
 
 namespace miljs {
+
+namespace detail {
+	struct GetUserdataParameterFromJSTypeError {
+		std::string metatable_name;
+		int index;
+	};
+}
+
 namespace detail {
 
 namespace PrototypeRegistry {
@@ -82,7 +90,7 @@ namespace PrototypeRegistry {
 		detail::_push_prototypes_table(ctx); // obj
 		detail::_push_typeinfo(ctx, type); // key
 		bool registered = duk_has_prop(ctx, -2) != 0;
-		duk_pop_2(ctx);
+		duk_pop(ctx);
 		return registered;
 	}
 
@@ -139,6 +147,15 @@ namespace PrototypeRegistry {
 		duk_pop_2(ctx);
 
 		return equal;
+	}
+
+	static inline void CheckType(duk_context *ctx, TypeID type, duk_idx_t index) {
+		if (!IsType(ctx, type, index)) {
+			throw TypeError{ 
+				GetTypeName(ctx, type),
+				GetTypeName(ctx, index)
+			};
+		}
 	}
 
 }

@@ -22,6 +22,12 @@ struct value_t<T*>
 		return nullptr;
 	}
 
+	static T* require(duk_context *ctx, duk_idx_t index) {
+		PrototypeRegistry::CheckType(ctx, typeid(T), index);
+		T* ret = (T*)Properties::obj_get_ptr(ctx, index);
+		return ret;
+	}
+
 	static void push(duk_context *ctx, T* t) {
 		if (t == nullptr) {
 			duk_push_null(ctx);
@@ -51,6 +57,10 @@ struct value_t
 			throw TypeError{ PrototypeRegistry::GetTypeName(ctx, typeid(T)) };
 		}
 		return *ptr;
+	}
+
+	static T& require(duk_context *ctx, duk_idx_t index) {
+		return get(ctx, index);
 	}
 
 	static void push(duk_context *ctx, T& t) {

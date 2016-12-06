@@ -207,11 +207,11 @@ public:
 	}
 
 	template <typename... Args>
-	Ref operator()(Args... args) {
+	Ref operator()(Args&&... args) {
 		ResetStackOnScopeExit r(*_ctx);
 		push();
 		int params = duk_get_top(*_ctx);
-		detail::_push_n(*_ctx, args...);
+		detail::_push_n(*_ctx, std::forward<Args>(args)...);
 		params = duk_get_top(*_ctx) - params;
 		duk_int_t status = duk_pcall(*_ctx, params);
 		if (status != DUK_EXEC_SUCCESS) {
