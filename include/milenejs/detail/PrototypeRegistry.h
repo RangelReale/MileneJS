@@ -4,6 +4,7 @@
 
 #include <typeinfo>
 #include <typeindex>
+#include <memory>
 #include <string>
 
 namespace miljs {

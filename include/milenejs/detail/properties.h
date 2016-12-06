@@ -56,7 +56,7 @@ namespace Properties {
 			duk_pop(ctx);
 
 			if (!isowned)
-				return false;
+				return nullptr;
 		}
 		return ptr;
 	}
