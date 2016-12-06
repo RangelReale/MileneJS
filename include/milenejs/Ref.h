@@ -318,6 +318,21 @@ public:
 		}
 	}
 
+	template <typename T, typename... Funs>
+	void SetClassBare(const std::string &name, Funs... funs) {
+		// set class without constructor or destructor
+		SetClassCustom<T, void, void>(name, funs...);
+	}
+
+	template <typename T>
+	void SetClassObj(const int index, T &t) {
+		ResetStackOnScopeExit r(*_ctx);
+		push();
+		_ctx->registry().RegisterClassObj(t);
+		duk_put_prop_index(*_ctx, -2, index);
+		duk_pop(*_ctx);
+	}
+
 	template <typename T>
 	void SetClassObj(const std::string &name, T &t) {
 		ResetStackOnScopeExit r(*_ctx);
@@ -327,7 +342,15 @@ public:
 		duk_pop(*_ctx);
 	}
 
-	template <typename T, typename... Args, typename... Funs>
+	template <typename T, typename... Funs>
+	void SetObj(const int index, T &t, Funs... funs) {
+		// set class without constructor or destructor
+		SetClassCustom<T, void, void>("", funs...);
+		// class class object
+		SetClassObj(index, t);
+	}
+
+	template <typename T, typename... Funs>
 	void SetObj(const std::string &name, T &t, Funs... funs) {
 		// set class without constructor or destructor
 		SetClassCustom<T, void, void>("", funs...);
