@@ -39,6 +39,23 @@ public:
 	}
 };
 
+class CopyUnregisteredType : public BaseMileneJSException {
+public:
+	using TypeID = std::reference_wrapper<const std::type_info>;
+	explicit CopyUnregisteredType(TypeID type) : _type(type) {}
+
+	TypeID getType() const
+	{
+		return _type;
+	}
+	char const * what() const noexcept override {
+		return "Tried to copy an object of an unregistered type. "
+			"Please register classes before passing instances by value.";
+	}
+private:
+	TypeID _type;
+};
+
 class NotImplementedError : public BaseMileneJSException {
 public:
 	char const * what() const noexcept override {

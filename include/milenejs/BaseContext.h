@@ -3,6 +3,7 @@
 #include "ResourceHandler.h"
 #include "ExceptionTypes.h"
 #include "detail/primitives.h"
+#include "detail/userdefined.h"
 #include "Registry.h"
 
 #include <duktape.h>

@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "util.h"
+#include "common/lifetime.h"
 #include <milenejs.h>
 #include <string>
 
@@ -128,4 +129,16 @@ TEST_CASE("Reference return", "[interop]") {
 	ctx.global().Register("return_special_reference", &return_special_reference);
 	Special &ref = ctx["return_special_reference"]().get<Special&>();
 	CHECK(&ref == &special);
+}
+
+test_lifetime::InstanceCounter return_value() { return {}; }
+
+TEST_CASE("Return value", "[interop]") {
+	using namespace test_lifetime;
+	Context ctx;
+	ctx.global().SetClass<InstanceCounter>("MyClass");
+	ctx.global().Register("return_value", &return_value);
+	int const instanceCountBeforeCreation = InstanceCounter::instances;
+	ctx("globalValue = return_value();");
+	CHECK(InstanceCounter::instances == instanceCountBeforeCreation + 1);
 }

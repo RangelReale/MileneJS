@@ -1,10 +1,8 @@
 #pragma once
 
 #include "BaseFun.h"
-#include "detail/primitives.h"
 #include <string>
 #include "detail/properties.h"
-//#include "metatable.h"
 
 namespace miljs {
 template <int N, typename Ret, typename... Args>
